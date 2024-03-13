@@ -7,8 +7,7 @@
         <i class="pi pi-plus todo__add--button" @click="addToDo"></i>
       </div>
       <div class="todo__filter">
-        <Dropdown v-model="selectStatus" :options="status" optionLabel="name" placeholder="All" checkmark
-          :highlightOnSelect="false" class="w-full md:w-14rem title__select" @change="handleFilterList" />
+        <Dropdown v-model="selectStatus" :options="status" optionLabel="name" placeholder="All" class="w-full md:w-14rem title__select" @change="handleFilterList" />
       </div>
     </div>
     <div class="container">
@@ -70,6 +69,7 @@ const toggleStatus = (id) => {
     }
   }
   localStorage.setItem('todos', JSON.stringify(listToDo.value));
+  handleFilterList()
   console.log(listToDo.value);
 }
 
