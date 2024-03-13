@@ -37,7 +37,7 @@ const listToDo = ref([])
 const listToShow = ref([])
 const idToDo = ref(0)
 const contentToDo = ref('')
-const selectStatus = ref('')
+const selectStatus = ref({name: 'All'})
 const statusItem = ref('')
 const status = ref([
   { name: 'All' },
@@ -61,6 +61,8 @@ const addToDo = () => {
     contentToDo.value = ''
   }
   listToShow.value = listToDo.value
+  handleFilterList()
+  console.log(selectStatus.value);
 }
 
 const toggleStatus = (id) => {
@@ -73,7 +75,6 @@ const toggleStatus = (id) => {
   }
   localStorage.setItem('todos', JSON.stringify(listToDo.value));
   // getDataToDoCurrent()
-  listToShow.value = listToDo.value
   handleFilterList()
   console.log(listToDo.value);
 }
