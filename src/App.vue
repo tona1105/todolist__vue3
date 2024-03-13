@@ -7,16 +7,18 @@
         <i class="pi pi-plus todo__add--button" @click="addToDo"></i>
       </div>
       <div class="todo__filter">
-        <Dropdown v-model="selectStatus" :options="status" optionLabel="name" placeholder="All" class="w-full md:w-14rem title__select" @change="handleFilterList" />
+        <Dropdown v-model="selectStatus" :options="status" optionLabel="name" placeholder="All"
+          class="w-full md:w-14rem title__select" @change="handleFilterList" />
       </div>
     </div>
     <div class="container">
       <div class="todo__list">
-        <div v-for="(item, index) in listToDo" :key="index" class="todo">
-          <div class="item__content" v-if="item" :class="{ 'line-though': item.status === 'Completed' }">
+
+        <div v-for="(item, index) in listToShow" :key="index" class="todo">
+          <div class="item__content" :class="{ 'line-though': item.status === 'Completed' }">
             {{ item.name }}
           </div>
-          <div class="item__option" v-if="item">
+          <div class="item__option">
             <i class="pi pi-check" @click="toggleStatus(item.id)"></i>
             <i class="pi pi-trash" @click="deleteItemTodo(item.id)"></i>
           </div>
@@ -32,6 +34,7 @@ import Dropdown from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
 import { ref, onMounted } from 'vue'
 const listToDo = ref([])
+const listToShow = ref([])
 const idToDo = ref(0)
 const contentToDo = ref('')
 const selectStatus = ref('')
@@ -57,18 +60,20 @@ const addToDo = () => {
     idToDo.value++
     contentToDo.value = ''
   }
+  listToShow.value = listToDo.value
 }
 
 const toggleStatus = (id) => {
   for (let i in listToDo.value) {
     if (listToDo.value[i].id === id) {
-      if (listToDo.value[i].status === 'Completed') {
-        listToDo.value[i].status = 'Uncompleted'
-      }
-      else listToDo.value[i].status = 'Completed'
+      if(listToDo.value[i].status === 'Uncompleted' ) listToDo.value[i].status = 'Completed'
+      else listToDo.value[i].status = 'Uncompleted'
+      console.log('true');
     }
   }
   localStorage.setItem('todos', JSON.stringify(listToDo.value));
+  // getDataToDoCurrent()
+  listToShow.value = listToDo.value
   handleFilterList()
   console.log(listToDo.value);
 }
@@ -78,13 +83,14 @@ const deleteItemTodo = (id) => {
   console.log(listDeleted);
   listToDo.value = listDeleted
   localStorage.setItem('todos', JSON.stringify(listToDo.value));
+  getDataToDoCurrent()
 }
 
 const getDataToDoCurrent = () => {
   const todos = localStorage.getItem('todos');
   if (todos) {
-    listToDo.value = JSON.parse(todos)
-    console.log(listToDo.value);
+    listToShow.value = JSON.parse(todos)
+    console.log(listToShow.value);
   }
 }
 const handleFilterList = () => {
@@ -97,10 +103,8 @@ const handleFilterList = () => {
   else {
     const listFilter = listToFilter.value.filter(item => item.status === selectStatus.value.name)
     console.log(listFilter);
-    listToDo.value = listFilter
-
+    listToShow.value = listFilter
   }
-
 }
 
 onMounted(() => {
