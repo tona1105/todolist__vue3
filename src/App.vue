@@ -83,7 +83,7 @@ const deleteItemTodo = (id) => {
   console.log(listDeleted);
   listToDo.value = listDeleted
   localStorage.setItem('todos', JSON.stringify(listToDo.value));
-  getDataToDoCurrent()
+ handleFilterList()
 }
 
 const getDataToDoCurrent = () => {
