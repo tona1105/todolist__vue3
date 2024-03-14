@@ -3,8 +3,8 @@
     <h1 class="todo__title">To-Do List</h1>
     <div class="todo__form">
       <div class="todo__add">
-        <InputText type="text" v-model="contentToDo" style="margin-right: 10px;" class="todo__add--input" required />
-        <i class="pi pi-plus todo__add--button" @click="addToDo"></i>
+        <InputText type="text" v-model="contentToDo" style="margin-right: 10px;" class="todo__add--input" required @keydown.enter="addToDo"/>
+        <i class="pi pi-plus todo__add--button" @click="addToDo" ></i>
       </div>
       <div class="todo__filter">
         <Dropdown v-model="selectStatus" :options="status" optionLabel="name" placeholder="All"
@@ -15,13 +15,7 @@
       <div class="todo__list">
 
         <div v-for="(item, index) in listToShow" :key="index" class="todo">
-          <div class="item__content" :class="{ 'line-though': item.status === 'Completed' }">
-            {{ item.name }}
-          </div>
-          <div class="item__option">
-            <i class="pi pi-check" @click="toggleStatus(item.id)"></i>
-            <i class="pi pi-trash" @click="deleteItemTodo(item.id)"></i>
-          </div>
+          <TodoItem :item="item" @toggle-status="toggleStatus" @delete-item="deleteItemTodo"/>
         </div>
       </div>
     </div>
@@ -30,6 +24,7 @@
 </template>
 
 <script setup>
+import TodoItem from './components/TodoItem.vue'
 import Dropdown from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
 import { ref, onMounted } from 'vue'
@@ -115,7 +110,7 @@ onMounted(() => {
 
 </script>
 
-<style scoped>
+<style>
 .logo {
   height: 6em;
   padding: 1.5em;
