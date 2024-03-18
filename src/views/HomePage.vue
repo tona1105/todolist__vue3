@@ -2,16 +2,10 @@
     <div>
         <h1 class="todo__title">To-Do List</h1>
         <div class="todo__form">
-            <div class="todo__add">
-                <InputText type="text" v-model="contentToDo" style="margin-right: 10px;" class="todo__add--input"
-                    required @keydown.enter="addToDo" />
-                <i class="pi pi-plus todo__add--button" @click="addToDo"></i>
-            </div>
-            <div class="todo__filter">
-                <Dropdown v-model="selectStatus" :options="status" optionLabel="name" placeholder="All"
-                    class="w-full md:w-14rem title__select" @change="handleFilterList" />
-            </div>
+            <AddTodo @add-todo="addToDo"/>
+            <FilterItem @filter-list="handleFilterList" ref="filter"/>
         </div>
+        <!-- List -->
         <div class="container">
             <div class="todo__list">
                 <div v-for="(item, index) in listToShow" :key="index" class="todo">
@@ -24,40 +18,33 @@
 </template>
 
 <script setup>
+import FilterItem from '../components/FilterItem.vue'
+import AddTodo from '../components/AddTodo.vue'
 import TodoItem from '../components/TodoItem.vue'
-import Dropdown from 'primevue/dropdown'
-import InputText from 'primevue/inputtext'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted  } from 'vue'
 const listToDo = ref([])
 const listToShow = ref([])
 const idToDo = ref(0)
-const contentToDo = ref('')
-const selectStatus = ref({ name: 'All' })
 const statusItem = ref('')
-const status = ref([
-    { name: 'All' },
-    { name: 'Completed' },
-    { name: 'Uncompleted' }
-])
-const addToDo = () => {
-    if (!contentToDo.value.trim()) {
+const filterChild = ref(null)
+const selectStatusGeted = ref({ name: 'All' })
+const addToDo = (content) => {
+    if (!content.trim()) {
         alert('Please enter a valid todo item.');
         return;
     }
     else {
         const data = {
             id: idToDo.value,
-            name: contentToDo.value,
+            name: content,
             status: 'Uncompleted'
         }
         listToDo.value.push(data)
         localStorage.setItem('todos', JSON.stringify(listToDo.value));
         idToDo.value++
-        contentToDo.value = ''
     }
-    listToShow.value = listToDo.value
-    handleFilterList()
-    console.log(selectStatus.value);
+    handleFilterList(selectStatusGeted.value.name)
+    
 }
 
 const toggleStatus = (id) => {
@@ -69,8 +56,7 @@ const toggleStatus = (id) => {
         }
     }
     localStorage.setItem('todos', JSON.stringify(listToDo.value));
-    // getDataToDoCurrent()
-    handleFilterList()
+    handleFilterList(selectStatusGeted.value.name)
     console.log(listToDo.value);
 }
 
@@ -79,25 +65,28 @@ const deleteItemTodo = (id) => {
     console.log(listDeleted);
     listToDo.value = listDeleted
     localStorage.setItem('todos', JSON.stringify(listToDo.value));
-    handleFilterList()
+    handleFilterList(selectStatusGeted.value.name)
 }
 
 const getDataToDoCurrent = () => {
     const todos = localStorage.getItem('todos');
     if (todos) {
         listToShow.value = JSON.parse(todos)
+        listToDo.value = JSON.parse(todos)
+        idToDo.value = listToDo.value[listToDo.value.length-1].id + 1
         console.log(listToShow.value);
     }
 }
-const handleFilterList = () => {
+const handleFilterList = (category) => {
+    selectStatusGeted.value.name = category
     const listToFilter = ref([])
     const todos = localStorage.getItem('todos');
     if (todos) {
         listToFilter.value = JSON.parse(todos)
     }
-    if (selectStatus.value.name === 'All') getDataToDoCurrent()
+    if (category === 'All') getDataToDoCurrent()
     else {
-        const listFilter = listToFilter.value.filter(item => item.status === selectStatus.value.name)
+        const listFilter = listToFilter.value.filter(item => item.status === category)
         console.log(listFilter);
         listToShow.value = listFilter
     }
