@@ -2,8 +2,8 @@
     <div>
         <h1 class="todo__title">To-Do List</h1>
         <div class="todo__form">
-            <AddTodo @add-todo="addToDo"/>
-            <FilterItem @filter-list="handleFilterList" ref="filter"/>
+            <AddTodo @add-todo="addToDo" />
+            <FilterItem @filter-list="handleFilterList" ref="filter" />
         </div>
         <!-- List -->
         <div class="container">
@@ -18,15 +18,15 @@
 </template>
 
 <script setup>
+import { useListTodo } from '../store'
 import FilterItem from '../components/FilterItem.vue'
 import AddTodo from '../components/AddTodo.vue'
 import TodoItem from '../components/TodoItem.vue'
-import { ref, onMounted  } from 'vue'
-const listToDo = ref([])
+import { ref, onMounted, watch } from 'vue'
+const store = useListTodo()
+const { listTodo } = store
 const listToShow = ref([])
 const idToDo = ref(0)
-const statusItem = ref('')
-const filterChild = ref(null)
 const selectStatusGeted = ref({ name: 'All' })
 const addToDo = (content) => {
     if (!content.trim()) {
@@ -39,61 +39,39 @@ const addToDo = (content) => {
             name: content,
             status: 'Uncompleted'
         }
-        listToDo.value.push(data)
-        localStorage.setItem('todos', JSON.stringify(listToDo.value));
+        store.addTodo(data)
         idToDo.value++
     }
     handleFilterList(selectStatusGeted.value.name)
-    
+
 }
 
 const toggleStatus = (id) => {
-    for (let i in listToDo.value) {
-        if (listToDo.value[i].id === id) {
-            if (listToDo.value[i].status === 'Uncompleted') listToDo.value[i].status = 'Completed'
-            else listToDo.value[i].status = 'Uncompleted'
-            console.log('true');
-        }
-    }
-    localStorage.setItem('todos', JSON.stringify(listToDo.value));
+    store.toggleTodo(id)
     handleFilterList(selectStatusGeted.value.name)
-    console.log(listToDo.value);
 }
 
 const deleteItemTodo = (id) => {
-    const listDeleted = listToDo.value.filter(item => item.id !== id)
-    console.log(listDeleted);
-    listToDo.value = listDeleted
-    localStorage.setItem('todos', JSON.stringify(listToDo.value));
+    store.deleteTodo(id)
     handleFilterList(selectStatusGeted.value.name)
 }
 
-const getDataToDoCurrent = () => {
-    const todos = localStorage.getItem('todos');
-    if (todos) {
-        listToShow.value = JSON.parse(todos)
-        listToDo.value = JSON.parse(todos)
-        idToDo.value = listToDo.value[listToDo.value.length-1].id + 1
-        console.log(listToShow.value);
-    }
-}
 const handleFilterList = (category) => {
     selectStatusGeted.value.name = category
-    const listToFilter = ref([])
-    const todos = localStorage.getItem('todos');
-    if (todos) {
-        listToFilter.value = JSON.parse(todos)
-    }
-    if (category === 'All') getDataToDoCurrent()
-    else {
-        const listFilter = listToFilter.value.filter(item => item.status === category)
-        console.log(listFilter);
-        listToShow.value = listFilter
-    }
+    listToShow.value = store.getItemByFilter(selectStatusGeted.value.name)
 }
 
+watch(() => listTodo, (x) => {
+    handleFilterList(selectStatusGeted.value.name)
+    localStorage.setItem('todos', JSON.stringify(x));
+})
+
 onMounted(() => {
-    getDataToDoCurrent()
+    store.bindDataToList()
+    listToShow.value = store.getAllListFromLocal
+    if (listToShow.value.length > 0) {
+        idToDo.value = listToShow.value[listToShow.value.length - 1].id + 1
+    }
 })
 
 
